@@ -45,4 +45,15 @@ contract DEX {
     require(token.transferFrom(msg.sender, address(this), tokens));
     return eth_bought;
   }
+
+  function deposit() public payable returns (uint256) {
+    uint256 eth_reserve = address(this).balance.sub(msg.value);
+    uint256 token_reserve = token.balanceOf(address(this));
+    uint256 token_amount = (msg.value.mul(token_reserve) / eth_reserve).add(1);
+    uint256 liquidity_minted = msg.value.mul(totalLiquidity) / eth_reserve;
+    liquidity[msg.sender] = liquidity[msg.sender].add(liquidity_minted);
+    totalLiquidity = totalLiquidity.add(liquidity_minted);
+    require(token.transferFrom(msg.sender, address(this), token_amount));
+    return liquidity_minted;
+  }
 }
